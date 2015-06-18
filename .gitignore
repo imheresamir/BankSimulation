@@ -1,3 +1,6 @@
+simulator/BankSimulation
+server/server
+
 # Logs
 logs
 *.log
