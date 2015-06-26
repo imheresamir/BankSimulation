@@ -9,6 +9,46 @@
 
 using banksimulation::BankSimulatorState;
 
+// Constructors
+Bank::Bank(std::string ef) :
+	eventFile(ef),
+	tellerCount(1),
+	oneLine(false),
+	debug(false),
+	proxy(nullptr)
+{
+}
+
+Bank::Bank(std::string ef, int tc) :
+	eventFile(ef),
+	tellerCount(tc),
+	oneLine(false),
+	debug(false),
+	proxy(nullptr)
+{
+}
+
+Bank::Bank(std::string ef, int tc, bool ol, bool d) :
+	eventFile(ef),
+	tellerCount(tc),
+	oneLine(ol),
+	debug(d),
+	proxy(nullptr)
+{
+}
+
+Bank::Bank(std::string ef, int tc, bool d, StateProxyClient* proxyClient) : 
+	eventFile(ef),
+	tellerCount(tc),
+	oneLine(false),
+	debug(d),
+	proxy(proxyClient)
+{
+}
+
+// Utility functions
+
+// NO NEED TO SORT!!!
 int Bank::findMin(int source_arr[], int size) {
 	// Create temporary array and copy contents of source array
 	int* temp_arr = new int[size];
@@ -41,6 +81,7 @@ int Bank::findMin(int source_arr[], int size) {
 	return result;
 }
 
+// Private helper functions
 bool Bank::loadEvents() {
 	BankEvent* arrivalEventArr;
 	customerCount = 0;
@@ -80,10 +121,10 @@ bool Bank::loadEvents() {
 
 		// Create the main event queue
 		eventQ = new Heap_PriorityQueue<BankEvent>(arrivalEventArr, customerCount);
-		Heap_PriorityQueue<BankEvent> tempQ(arrivalEventArr, customerCount);
 
 		/*** Begin GRPC Hook ***/
 		if(proxy != nullptr) {
+			Heap_PriorityQueue<BankEvent> tempQ(arrivalEventArr, customerCount);
 			BankEvent* tempArr = new BankEvent[customerCount];
 
 			for(int i = 0; i < customerCount; i++) {
@@ -111,42 +152,7 @@ bool Bank::loadEvents() {
 	
 }
 
-Bank::Bank(std::string ef) :
-	eventFile(ef),
-	tellerCount(1),
-	oneLine(false),
-	debug(false),
-	proxy(nullptr)
-{
-}
-
-Bank::Bank(std::string ef, int tc) :
-	eventFile(ef),
-	tellerCount(tc),
-	oneLine(false),
-	debug(false),
-	proxy(nullptr)
-{
-}
-
-Bank::Bank(std::string ef, int tc, bool ol, bool d) :
-	eventFile(ef),
-	tellerCount(tc),
-	oneLine(ol),
-	debug(d),
-	proxy(nullptr)
-{
-}
-
-Bank::Bank(std::string ef, int tc, bool d, StateProxyClient* proxyClient) : 
-	eventFile(ef),
-	tellerCount(tc),
-	oneLine(false),
-	debug(d),
-	proxy(proxyClient)
-{
-}
-
+// Public methods
 void Bank::simulate() {
 	// First load events from input file
 	
@@ -235,7 +241,14 @@ void Bank::simulate() {
 			} else {
 				if (tellerNum == -1) {
 					// Find smallest teller line
-					int minTellerLineLength = findMin(tellerLineLength, tellerCount);
+					//int minTellerLineLength = findMin(tellerLineLength, tellerCount);
+					int minTellerLineLength = tellerLineLength[0];
+
+					for (int i = 1; i < tellerCount; i++) {
+						if (tellerLineLength[i] < minTellerLineLength) {
+							minTellerLineLength = tellerLineLength[i];
+						}
+					}
 
 					if (debug) {
 						cout << "minTellerLineLength: " << minTellerLineLength << endl;
@@ -307,7 +320,6 @@ void Bank::simulate() {
 						proxy->setAction(BankSimulatorState::CUSTOMER_SENT_DIRECTLY_TO_TELLER);
 						proxy->SendState();
 					}
-					
 					/*** End GRPC Hook ***/
 				}
 				else {
@@ -462,6 +474,7 @@ void Bank::printStatistics() {
 	std::cout << "\tMaximum Line Length: " << maxLineLength << endl;
 }
 
+// Destructor
 Bank::~Bank() {
 	delete[] tellerLine;
 	delete[] tellerLineLength;

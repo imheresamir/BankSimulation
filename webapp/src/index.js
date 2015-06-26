@@ -194,7 +194,7 @@ function loadEvents() {
 		    			+ 'Duration: ' + events[i].duration + '</b>',
 		    properties: {
 		    	'border': '1px solid red',
-		    	'color': '#550000'
+		    	'color': 'white'
 		    }
 		});
 

@@ -17,14 +17,23 @@ using namespace std;
 
 // Main function
 int main() {
+	// Animation
 	StateProxyClient proxy(
       grpc::CreateChannel("localhost:50051", grpc::InsecureCredentials(),
                           ChannelArguments()));
 
-	// Simulate a bank with 3 tellers and events from the input file
 	Bank b("test.txt", 3, false, &proxy);
 
-    //Bank b("test.txt", 3, true, true);
+	// Bank parameters: (input file, # tellers, Single line?, debug?)
+
+	// Simulate a bank with 1 tellers and 1 line
+	//Bank b("test.txt", 1, false, false);
+	
+	// Simulate a bank with 3 tellers and 1 line
+	//Bank b("test.txt", 3, true, false);
+
+	// Simulate a bank with 3 tellers and 3 line
+	//Bank b("test.txt", 3, false, false);
 	
 	b.simulate();
 

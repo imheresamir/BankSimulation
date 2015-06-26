@@ -87,7 +87,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, _, err := conn.ReadMessage()
 		if err != nil {
-			return
+			break
 		}
 
 		stateBuf := <-stateChanMap[pid]
@@ -96,5 +96,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+
+	close(stateChanMap[pid])
 
 }
