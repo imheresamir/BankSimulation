@@ -36,6 +36,23 @@ cd server
 ```
 Launch browser and connect to localhost:1618
 
+## Known issues
+Currently the ProtocolBuffers generated Go code needs to be manually patched to pass through the raw payload bytes from the wire. The correct source file is pre-generated in protos/AnimationTrigger.pb.go
+If `go generate` is run from the server directory, the _BankSimulatorStateProxy_SendState_Handler function (last function in the file) needs to be replaced with the following:
+```
+func _BankSimulatorStateProxy_SendState_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+	in := new(BankSimulatorState)
+	if err := codec.Unmarshal(buf, in); err != nil {
+		return nil, err
+	}
+	out, err := srv.(BankSimulatorStateProxyServer).SendState(ctx, buf, in)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+```
+## Directory Structure
 - /
   - /simulator : C++ bank simulator source
   - /webapp/src : JavaScript web animation source
